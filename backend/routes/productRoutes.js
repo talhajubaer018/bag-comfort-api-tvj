@@ -8,8 +8,8 @@ router.get('/', getProducts)
 
 router.post('/', createProduct)
 
-router.put('/', updateProduct)
+router.put('/:id', updateProduct)
 
-router.put('/', deleteProduct)
+router.delete('/:id', deleteProduct)
 
 module.exports = router
