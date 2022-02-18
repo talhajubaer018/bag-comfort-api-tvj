@@ -1,12 +1,14 @@
 const asyncHandler = require('express-async-handler')
 
 const Product = require ('../models/productModel')
+const User = require('../models/userModel')
+
 
 // @desc Get Products
 // @route GET /api/products
 // @access Private
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find()
+  const products = await Product.find({ user: req.user.id })
 
   res.status(200).json( products)
 })
@@ -24,14 +26,15 @@ const createProduct = asyncHandler(async (req, res) => {
     name: req.body.name,
     description: req.body.description,
     price: req.body.price,
-    stock: req.body.stock
+    stock: req.body.stock,
+    user: req.user.id
   })
 
   res.status(200).json(product)
 })
 
-// @desc Get Products
-// @route GET /api/products/:id
+// @desc Update Products
+// @route PUT /api/products/:id
 // @access Private
 const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id)
@@ -40,6 +43,20 @@ const updateProduct = asyncHandler(async (req, res) => {
     res.status(400)
     throw new Error('Product Not Found')
   }
+  const user = await User.findById(req.user.id)
+  //Check for user
+  if(!user) {
+    res.status(401)
+    throw new Error('User not found')
+  }
+  console.log(product.user, user.id)
+  console.log(product.user.toString(), user.id)
+  //Make sure  the logged in user matches the product user
+  if(product.user.toString() !== user.id){
+    res.status(401)
+    throw new Error('User not authorized')
+  }
+
   const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true
   })
@@ -56,6 +73,19 @@ const deleteProduct = asyncHandler(async (req, res) => {
   if(!product) {
     res.status(400)
     throw new Error('Product Not Found')
+  }
+
+  const user = await User.findById(req.user.id)
+  //Check for user
+  if(!user) {
+    res.status(401)
+    throw new Error('User not found')
+  }
+
+  //Make sure  the logged in user matches the product user
+  if(product.user.toString() !== user.id){
+    res.status(401)
+    throw new Error('User not authorized')
   }
 
   await product.remove()

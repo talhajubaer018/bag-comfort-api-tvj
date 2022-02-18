@@ -1,6 +1,11 @@
 const mongoose = require('mongoose')
 
 const productSchema = mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  },
   name: {
     type: String,
     required: [true, 'Please add a name']
@@ -22,4 +27,4 @@ const productSchema = mongoose.Schema({
   timestamps: true
 })
 
-module.exports = mongoose.model('productModel', productSchema)
+module.exports = mongoose.model('Product', productSchema)
